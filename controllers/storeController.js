@@ -1,5 +1,20 @@
 const mongoose = require('mongoose');
 const Store = mongoose.model('Store');
+const multer = require('multer');
+const jimp = require('jimp');
+const uuid = require('uuid');
+
+const multerOptions = {
+  storage: multer.memoryStorage(),
+  fileFilter(req, file, next) {
+    const isPhoto = file.mimetype.startsWith('images/');
+    if (isPhoto) {
+      next(null, true);
+    } else {
+      next({ message: "That filetype isn't allowed!" }, false);
+    }
+  }
+};
 // exports.myMiddleware = (req, res, next) => {
 //   req.name = 'Wes';
 //   next();
@@ -13,6 +28,18 @@ exports.addStore = (req, res) => {
   res.render('editStore', {
     title: 'Add Store'
   });
+};
+
+exports.upload = multer(multerOptions).single('photo');
+
+exports.resize = async (req, res, next) => {
+  // check if there is no new file to resize
+  if (!req.file) {
+    next(); // skip to the nex middleware
+    return;
+  }
+
+  console.log(req.file);
 };
 
 exports.createStore = async (req, res) => {
